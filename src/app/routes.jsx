@@ -1,39 +1,61 @@
-import { Routes, Route } from "react-router-dom";
+import { Suspense } from "react";
+import {
+  Routes,
+  Route,
+} from "react-router-dom";
 
 import { routeConfig } from "./routeConfig";
 
 import AuthLayout from "../components/layout/AuthLayout";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import LandingLayout from "../components/layout/LandingLayout";
+
 import ProtectedRoute from "../routes/ProtectedRoute";
+
+import PageLoader from "../components/common/PageLoader";
+
+// const layouts = {
+//   auth: AuthLayout,
+//   dashboard: DashboardLayout,
+//   landing: LandingLayout,
+// };
 
 const layouts = {
   auth: AuthLayout,
-  dashboard: DashboardLayout,
-  landing: LandingLayout,
+  app: AppLayout,
 };
 
 function AppRoutes() {
   return (
-    <Routes>
-      {routeConfig.map((route) => {
-        const Layout = layouts[route.layout];
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
 
-        const page = route.protected ? (
-          <ProtectedRoute>{route.element}</ProtectedRoute>
-        ) : (
-          route.element
-        );
+        {routeConfig.map((route) => {
+          const Layout = layouts[route.layout];
 
-        return (
-          <Route
-            key={route.path}
-            path={route.path}
-            element={<Layout>{page}</Layout>}
-          />
-        );
-      })}
-    </Routes>
+          return (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                <Layout {...route.layoutProps}>
+                  {route.protected ? (
+                    <ProtectedRoute
+                      permission={route.permission}
+                    >
+                      {route.element}
+                    </ProtectedRoute>
+                  ) : (
+                    route.element
+                  )}
+                </Layout>
+              }
+            />
+          );
+        })}
+
+      </Routes>
+    </Suspense>
   );
 }
 

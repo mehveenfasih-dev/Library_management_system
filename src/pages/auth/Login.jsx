@@ -1,4 +1,12 @@
-import { Box, Button, Link, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Link,
+  Typography,
+} from "@mui/material";
+
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
+
 import { useForm } from "react-hook-form";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -27,14 +35,10 @@ const Login = () => {
   });
 
   const onSubmit = (data) => {
-    console.log("LOGIN FORM SUBMITTED:", data);
-
     dispatch(showLoader());
 
     try {
       const storedUser = getUser();
-
-      console.log("STORED USER:", storedUser);
 
       if (!storedUser) {
         dispatch(
@@ -59,7 +63,6 @@ const Login = () => {
         return;
       }
 
-     
       dispatch(login(storedUser));
 
       dispatch(
@@ -86,23 +89,51 @@ const Login = () => {
 
   return (
     <Box>
-      <Typography
-        variant="h4"
-        textAlign="center"
-        fontWeight={600}
-        mb={1}
+{/*      
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          mb: 4,
+        }}
       >
-        Sign In
-      </Typography>
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 2.5,
+            backgroundColor: "primary.main",
+            color: "#FFFFFF",
+            mb: 1.5,
+          }}
+        >
+          <MenuBookRoundedIcon sx={{ fontSize: 30 }} />
+        </Box>
 
-      <Typography
-        textAlign="center"
-        color="text.secondary"
-        mb={3}
-      >
-        Welcome back! Please sign in to continue.
-      </Typography>
+        */}
 
+{/*       
+      </Box> */}
+
+      <Box sx={{ textAlign: "center", mb: 3 }}>
+        <Typography
+          variant="h4"
+          fontWeight={900}
+          mb={1}
+        >
+          Sign In
+        </Typography>
+
+        <Typography color="text.secondary">
+          Welcome back! Please sign in to continue.
+        </Typography>
+      </Box>
+
+      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormInput
           label="Email"
@@ -135,13 +166,24 @@ const Login = () => {
           variant="contained"
           fullWidth
           size="large"
-          sx={{ mt: 2 }}
+          sx={{
+            mt: 2,
+            py: 1.4,
+            borderRadius: 2,
+            textTransform: "none",
+            fontWeight: 600,
+          }}
         >
           Sign In
         </Button>
       </form>
 
-      <Typography textAlign="center" mt={3}>
+      {/* Register */}
+      <Typography
+        textAlign="center"
+        mt={3}
+        color="text.secondary"
+      >
         Don't have an account?{" "}
         <Link
           component={RouterLink}
@@ -152,7 +194,12 @@ const Login = () => {
         </Link>
       </Typography>
 
-      <Typography textAlign="center" mt={1}>
+      {/* Contact */}
+      <Typography
+        textAlign="center"
+        mt={1}
+        color="text.secondary"
+      >
         <Link
           component={RouterLink}
           to={ROUTES.CONTACT}

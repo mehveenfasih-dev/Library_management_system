@@ -1,16 +1,80 @@
-import { ROUTES } from "../routes/routeConstants";
+// import { lazy } from "react";
+// import { ROUTES } from "../routes/routeConstants";
 
-import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
-import Contact from "../pages/contact/Contact";
-import Dashboard from "../pages/dashboard/Dashboard";
-import Books from "../pages/books/Books";
-import BookDetails from "../pages/books/BookDetails";
-import Library from "../pages/library/Library";
-import Users from "../pages/users/Users";
-import Theme from "../pages/theme/Theme";
+// const Login = lazy(() => import("../pages/auth/Login"));
+// const Register = lazy(() => import("../pages/auth/Register"));
+// const Contact = lazy(() => import("../pages/contact/Contact"));
+
+// const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
+
+// const Books = lazy(() => import("../pages/books/Books"));
+// const BookDetails = lazy(() => import("../pages/books/BookDetails"));
+
+// const Library = lazy(() => import("../pages/library/Library"));
+// const Users = lazy(() => import("../pages/users/Users"));
+// const Theme = lazy(() => import("../pages/theme/Theme"));
+
+// export const routeConfig = [
+//   // ================= AUTH =================
+// {
+//   path: ROUTES.DASHBOARD,
+//   element: <Dashboard />,
+//   layout: "dashboard",
+//   protected: true,
+//   breadcrumb: "Dashboard",
+// },
+
+// {
+//   path: ROUTES.BOOKS,
+//   element: <Books />,
+//   layout: "dashboard",
+//   protected: true,
+//   permission: "view_books",
+//   breadcrumb: "Books",
+// },
+
+// {
+//   path: ROUTES.BOOK_DETAILS,
+//   element: <BookDetails />,
+//   layout: "dashboard",
+//   protected: true,
+//   permission: "view_books",
+//   breadcrumb: "Book Details",
+// },
+
+// {
+//   path: ROUTES.LIBRARY,
+//   element: <Library />,
+//   layout: "dashboard",
+//   protected: true,
+//   permission: "manage_library",
+//   breadcrumb: "Library",
+// },
+
+// {
+//   path: ROUTES.USERS,
+//   element: <Users />,
+//   layout: "dashboard",
+//   protected: true,
+//   permission: "manage_users",
+//   breadcrumb: "Users",
+// },
+
+// {
+//   path: ROUTES.THEME,
+//   element: <Theme />,
+//   layout: "dashboard",
+//   protected: true,
+//   permission: "manage_theme",
+//   breadcrumb: "Theme",
+// },
+// ]
+
+
 
 export const routeConfig = [
+  // ================= AUTH =================
+
   {
     path: ROUTES.LOGIN,
     element: <Login />,
@@ -25,52 +89,77 @@ export const routeConfig = [
     protected: false,
   },
 
-  {
-    path: ROUTES.CONTACT,
-    element: <Contact />,
-    layout: "landing",
-    protected: false,
-  },
+  // ================= PUBLIC =================
 
   {
-    path: ROUTES.DASHBOARD,
-    element: <Dashboard />,
-    layout: "dashboard",
-    protected: true,
-  },
-
-  {
-    path: ROUTES.BOOKS,
-    element: <Books />,
-    layout: "landing",
+    path: ROUTES.CATALOG,
+    element: <Catalog />,
+    layout: "app",
     protected: false,
+    breadcrumb: "Catalog",
   },
 
   {
     path: ROUTES.BOOK_DETAILS,
     element: <BookDetails />,
-    layout: "landing",
+    layout: "app",
     protected: false,
+    breadcrumb: "Book Details",
+  },
+
+  // ================= MEMBER =================
+
+  {
+    path: ROUTES.MY_REQUESTS,
+    element: <MyRequests />,
+    layout: "app",
+    protected: true,
+    breadcrumb: "My Requests",
   },
 
   {
-    path: ROUTES.LIBRARY,
-    element: <Library />,
-    layout: "dashboard",
+    path: ROUTES.PROFILE,
+    element: <Profile />,
+    layout: "app",
     protected: true,
+    breadcrumb: "Profile",
+  },
+
+  // ================= ADMIN =================
+
+  {
+    path: ROUTES.DASHBOARD,
+    element: <Dashboard />,
+    layout: "app",
+    protected: true,
+    role: "admin",
+    breadcrumb: "Dashboard",
+  },
+
+  {
+    path: ROUTES.BOOKS,
+    element: <Books />,
+    layout: "app",
+    protected: true,
+    role: "admin",
+    breadcrumb: "Books",
   },
 
   {
     path: ROUTES.USERS,
     element: <Users />,
-    layout: "dashboard",
+    layout: "app",
     protected: true,
+    role: "admin",
+    breadcrumb: "Users",
   },
 
   {
-    path: ROUTES.THEME,
-    element: <Theme />,
-    layout: "dashboard",
+    path: ROUTES.ALL_REQUESTS,
+    element: <AllRequests />,
+    layout: "app",
     protected: true,
+    role: "admin",
+    breadcrumb: "All Requests",
   },
 ];

@@ -1,6 +1,6 @@
 
 import { createSlice } from "@reduxjs/toolkit";
-import { getUser, removeUser } from "../../utils/storage";
+import { getUser, removeUser } from "../../utils/storage"
 
 const storedUser = getUser();
 

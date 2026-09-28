@@ -1,4 +1,3 @@
-
 import { TextField } from "@mui/material";
 
 const FormInput = ({
@@ -15,6 +14,11 @@ const FormInput = ({
       label={label}
       type={type}
       margin="normal"
+      slotProps={{
+        inputLabel: {
+          shrink: type === "date" ? true : undefined,
+        },
+      }}
       {...register(name, rules)}
       error={Boolean(error)}
       helperText={error?.message || ""}
@@ -23,4 +27,3 @@ const FormInput = ({
 };
 
 export default FormInput;
-

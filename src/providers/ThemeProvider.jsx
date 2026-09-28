@@ -23,20 +23,35 @@ const ThemeProvider = ({ children }) => {
           mode,
 
           primary: {
-            main: mode === "light" ? "#123B70" : "#3B82F6",
+            main: mode === "light" ? "#173B67" : "#3B82F6",
           },
 
           background: {
-            default: mode === "light" ? "#FFFFFF" : "#000000",
-            paper: mode === "light" ? "#F5F6F8" : "#111111",
+            default: mode === "light" ? "#dfe2e6" : "#080D16",
+            paper: mode === "light" ? "#FFFFFF" : "#111927",
           },
 
           text: {
-            primary: mode === "light" ? "#1F2937" : "#FFFFFF",
-            secondary: mode === "light" ? "#4B5563" : "#D1D5DB",
+            primary: mode === "light" ? "#172033" : "#F8FAFC",
+            secondary: mode === "light" ? "#667085" : "#A8B3C2",
           },
 
-          divider: mode === "light" ? "#D9DDE3" : "#26364F",
+          divider: mode === "light" ? "#E2E8F0" : "#27272A",
+          success: {
+            main: "#22C55E",
+          },
+
+          warning: {
+            main: "#F59E0B",
+          },
+
+          error: {
+            main: "#EF4444",
+          },
+
+          info: {
+            main: "#38BDF8",
+          },
         },
       }),
     [mode]

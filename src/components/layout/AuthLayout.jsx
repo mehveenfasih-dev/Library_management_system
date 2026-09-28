@@ -1,8 +1,6 @@
-
-
 import { Box, Paper } from "@mui/material";
 
-const AuthLayout = ({ children }) => {
+const AuthLayout = ({ children, maxWidth = 450 }) => {
   return (
     <Box
       sx={{
@@ -12,17 +10,19 @@ const AuthLayout = ({ children }) => {
         justifyContent: "center",
         backgroundColor: "background.default",
         px: 2,
+        py: 5,
       }}
     >
       <Paper
-        elevation={4}
+        elevation={0}
         sx={{
           width: "100%",
-          maxWidth: 450,
-          p: 4,
+          maxWidth,
+          p: { xs: 3, sm: 4, md: 5 },
+          backgroundColor: "background.paper",
           border: "1px solid",
           borderColor: "divider",
-          borderRadius: 2,
+          borderRadius: 3,
         }}
       >
         {children}
