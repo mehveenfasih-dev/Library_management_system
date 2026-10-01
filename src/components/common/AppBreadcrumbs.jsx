@@ -1,70 +1,68 @@
-import { Breadcrumbs,Link, Typography } from "@mui/material";
-import {  Link as RouterLink,matchPath, useLocation } from "react-router-dom";
-import { routeConfig } from "../../app/routeConfig";
-import { ROUTES } from "../../routes/routeConstants";
- const AppBreadcrumbs=()=>{
-    const location=useLocation();
-   const currentRoute= routeConfig.find((route)=>matchPath(route.path,location.pathname));
-const isBookDetails=matchPath( ROUTES.BOOK_DETAILS,location.pathname)
-    return(
-       <Breadcrumbs
-  separator="›"
-sx={{
-    width: "max-content",
-    maxWidth: "100%",
-    "& .MuiBreadcrumbs-ol": {
-      display: "flex",
-      flexWrap: "nowrap !important",
-      alignItems: "center",
-      whiteSpace: "nowrap",
-    },
-    "& .MuiBreadcrumbs-li": {
-      whiteSpace: "nowrap",
-    },
-  }}
->
-  <Link
-    component={RouterLink}
-    to={ROUTES.DASHBOARD}
-    underline="none"
-    color="text.secondary"
-    sx={{
-      "&:hover": {
-        color: "primary.main",
-      },
-    }}
-  >
-    Dashboard
-  </Link>
+import { Breadcrumbs, Link, Typography } from "@mui/material"
+import { Link as RouterLink, matchPath, useLocation } from "react-router-dom"
+import { useSelector } from "react-redux"
 
-  {isBookDetails &&
+import { routeConfig } from "../../app/routeConfig"
+import { ROUTES } from "../../routes/routeConstants"
+import { selectBookDetail } from "../../store/slices/bookSlice"
+import { useLocale } from "../../providers/LocaleProvider"
+import { useAuth } from "../../providers/AuthProvider"
 
-      <Link
-        component={RouterLink}
-        to={ROUTES.BOOKS}
-        underline="none"
-        color="text.secondary"
-        sx={{
-          "&:hover": {
-            color: "primary.main",
-          },
-        }}
-      >
-        Books
-      </Link>
+const useCrumbs = () => {
+  const { pathname } = useLocation()
+  const { isAdmin } = useAuth()
+  const { book } = useSelector(selectBookDetail)
 
- }
- 
+  const route = routeConfig.find((item) => matchPath(item.path, pathname))
+  const isBookDetails = Boolean(matchPath(ROUTES.BOOK_DETAILS, pathname))
+  const crumbs = []
 
-  <Typography
-      color="text.primary"
-      fontWeight={600}
-      sx={{ whiteSpace: "nowrap" }}
-    >
-      {isBookDetails ? "Book Details" : currentRoute?.breadcrumb}
-    </Typography>
-  
-</Breadcrumbs>
-    )
- }
- export default AppBreadcrumbs
+  // Admins start from the dashboard. Guests and members start from the catalog.
+  if (isAdmin && route?.path !== ROUTES.DASHBOARD) {
+    crumbs.push({ label: "Dashboard", to: ROUTES.DASHBOARD })
+  }
+
+  if (isBookDetails) {
+    crumbs.push({ label: "Catalog", to: ROUTES.CATALOG })
+    crumbs.push({ label: book?.title ?? "Book details", translate: !book?.title })
+  } else {
+    crumbs.push({ label: route?.breadcrumb ?? "Page not found" })
+  }
+
+  return crumbs
+}
+
+const AppBreadcrumbs = () => {
+  const crumbs = useCrumbs()
+  const { t } = useLocale()
+
+  return (
+    <Breadcrumbs separator="›" sx={{ mb: 2, maxWidth: "100%" }}>
+      {crumbs.map((crumb) =>
+        crumb.to ? (
+          <Link
+            key={crumb.label}
+            component={RouterLink}
+            to={crumb.to}
+            underline="hover"
+            color="text.secondary"
+          >
+            {crumb.translate === false ? crumb.label : t(crumb.label)}
+          </Link>
+        ) : (
+          <Typography
+            key={crumb.label}
+            color="text.primary"
+            fontWeight={600}
+            noWrap
+            sx={{ maxWidth: { xs: 200, sm: 480 } }}
+          >
+            {crumb.translate === false ? crumb.label : t(crumb.label)}
+          </Typography>
+        )
+      )}
+    </Breadcrumbs>
+  )
+}
+
+export default AppBreadcrumbs

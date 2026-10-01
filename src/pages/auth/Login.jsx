@@ -1,164 +1,77 @@
-import {
-  Box,
-  Button,
-  Link,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Link, Typography } from "@mui/material"
+import { useForm } from "react-hook-form"
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom"
+import { useDispatch } from "react-redux"
 
-import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
+import FormInput from "../../components/common/FormInput"
+import { loginRequest } from "../../api/authApi"
+import { ROUTES } from "../../routes/routeConstants"
+import { hideLoader, showLoader } from "../../store/slices/appSlice"
+import { useLocale } from "../../providers/LocaleProvider"
+import { useAuth } from "../../providers/AuthProvider"
+import { useNotification } from "../../providers/NotificationProvider"
 
-import { useForm } from "react-hook-form";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-
-import FormInput from "../../components/common/FormInput";
-import { ROUTES } from "../../routes/routeConstants";
-import { getUser } from "../../utils/storage";
-
-import { login } from "../../store/slices/authSlice";
-import {
-  showLoader,
-  hideLoader,
-  showNotification,
-} from "../../store/slices/uiSlice";
+const identifierRules = {
+  required: "Email or username is required",
+}
 
 const Login = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const dispatch = useDispatch()
+  const { t } = useLocale()
+  const { signIn } = useAuth()
+  const { notify } = useNotification()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    mode: "onBlur",
-  });
+  } = useForm({ mode: "onBlur" })
 
-  const onSubmit = (data) => {
-    dispatch(showLoader());
+  const redirectTo = location.state?.from?.pathname ?? ROUTES.CATALOG
+
+  const onSubmit = async (data) => {
+    dispatch(showLoader())
 
     try {
-      const storedUser = getUser();
+      const session = await loginRequest(data)
 
-      if (!storedUser) {
-        dispatch(
-          showNotification({
-            message: "No account found. Please register first.",
-            severity: "error",
-          })
-        );
-        return;
-      }
-
-      if (
-        data.email !== storedUser.email ||
-        data.password !== storedUser.password
-      ) {
-        dispatch(
-          showNotification({
-            message: "Invalid email or password.",
-            severity: "error",
-          })
-        );
-        return;
-      }
-
-      dispatch(login(storedUser));
-
-      dispatch(
-        showNotification({
-          message: "Login successful!",
-          severity: "success",
-        })
-      );
-
-      navigate(ROUTES.DASHBOARD);
+      signIn(session)
+      notify(`${t("Welcome back")}, ${session.user.name}!`)
+      navigate(redirectTo, { replace: true })
     } catch (error) {
-      console.error("LOGIN ERROR:", error);
-
-      dispatch(
-        showNotification({
-          message: "Something went wrong during login.",
-          severity: "error",
-        })
-      );
+      notify(error.message, "error")
     } finally {
-      dispatch(hideLoader());
+      dispatch(hideLoader())
     }
-  };
+  }
 
   return (
     <Box>
-{/*      
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          mb: 4,
-        }}
-      >
-        <Box
-          sx={{
-            width: 44,
-            height: 44,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 2.5,
-            backgroundColor: "primary.main",
-            color: "#FFFFFF",
-            mb: 1.5,
-          }}
-        >
-          <MenuBookRoundedIcon sx={{ fontSize: 30 }} />
-        </Box>
-
-        */}
-
-{/*       
-      </Box> */}
-
       <Box sx={{ textAlign: "center", mb: 3 }}>
-        <Typography
-          variant="h4"
-          fontWeight={900}
-          mb={1}
-        >
-          Sign In
+        <Typography variant="h4" fontWeight={800} mb={1}>
+          {t("Sign in")}
         </Typography>
-
-        <Typography color="text.secondary">
-          Welcome back! Please sign in to continue.
-        </Typography>
+        <Typography color="text.secondary">{t("Welcome back! Please sign in to continue.")}</Typography>
       </Box>
 
-      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormInput
-          label="Email"
+          label={t("Email or username")}
           name="email"
-          type="email"
           register={register}
           error={errors.email}
-          rules={{
-            required: "Email is required",
-            pattern: {
-              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: "Enter a valid email address",
-            },
-          }}
+          rules={identifierRules}
         />
 
         <FormInput
-          label="Password"
+          label={t("Password")}
           name="password"
           type="password"
           register={register}
           error={errors.password}
-          rules={{
-            required: "Password is required",
-          }}
+          rules={{ required: "Password is required" }}
         />
 
         <Button
@@ -166,50 +79,28 @@ const Login = () => {
           variant="contained"
           fullWidth
           size="large"
-          sx={{
-            mt: 2,
-            py: 1.4,
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: 600,
-          }}
+          sx={{ mt: 2, py: 1.4, borderRadius: 2, textTransform: "none", fontWeight: 600 }}
         >
-          Sign In
+          {t("Sign in")}
         </Button>
       </form>
 
-      {/* Register */}
-      <Typography
-        textAlign="center"
-        mt={3}
-        color="text.secondary"
-      >
-        Don't have an account?{" "}
-        <Link
-          component={RouterLink}
-          to={ROUTES.REGISTER}
-          underline="hover"
-        >
-          Create an account
+      <Typography textAlign="center" mt={3} color="text.secondary">
+        {t("Do not have an account?")}{" "}
+        <Link component={RouterLink} to={ROUTES.REGISTER} underline="hover">
+          {t("Create an account")}
         </Link>
       </Typography>
 
-      {/* Contact */}
-      <Typography
-        textAlign="center"
-        mt={1}
-        color="text.secondary"
-      >
-        <Link
-          component={RouterLink}
-          to={ROUTES.CONTACT}
-          underline="hover"
-        >
-          Contact Us
+      <Typography textAlign="center" mt={1}>
+        <Link component={RouterLink} to={ROUTES.CATALOG} underline="hover">
+          {t("Continue as guest")}
         </Link>
       </Typography>
+
+     
     </Box>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

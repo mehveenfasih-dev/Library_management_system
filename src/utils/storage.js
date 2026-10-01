@@ -1,15 +1,24 @@
-const USER_KEY = "user";
+export const readJSON = (key, fallback = null) => {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : fallback
+  } catch {
+    return fallback
+  }
+}
 
-export const getUser = () => {
-  const user = localStorage.getItem(USER_KEY);
+export const writeJSON = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // storage full or blocked: the app keeps working without persistence
+  }
+}
 
-  return user ? JSON.parse(user) : null;
-};
-
-export const saveUser = (user) => {
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
-};
-
-export const removeUser = () => {
-  localStorage.removeItem(USER_KEY);
-};
+export const removeKey = (key) => {
+  try {
+    localStorage.removeItem(key)
+  } catch {
+    // ignore
+  }
+}

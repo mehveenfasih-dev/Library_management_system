@@ -2,8 +2,11 @@ import {
   Box,
   Typography,
 } from "@mui/material";
+import { useLocale } from "../../providers/LocaleProvider"
 
 const Footer = () => {
+  const { t } = useLocale()
+
   return (
     <Box
       component="footer"
@@ -36,21 +39,21 @@ const Footer = () => {
           variant="caption"
           color="text.secondary"
         >
-          About
+          {t("About")}
         </Typography>
 
         <Typography
           variant="caption"
           color="text.secondary"
         >
-          Help
+          {t("Help")}
         </Typography>
 
         <Typography
           variant="caption"
           color="text.secondary"
         >
-          Contact
+          {t("Contact")}
         </Typography>
       </Box>
 

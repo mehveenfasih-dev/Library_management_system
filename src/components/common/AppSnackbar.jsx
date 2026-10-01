@@ -1,25 +1,18 @@
 
-import { Alert, Snackbar } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
+import { Alert, Snackbar } from "@mui/material"
 
-import { hideNotification } from "../../store/slices/uiSlice";
+import { useLocale } from "../../providers/LocaleProvider"
+import { useNotification } from "../../providers/NotificationProvider"
 
 const AppSnackbar = () => {
-  const dispatch = useDispatch();
-
-  const notification = useSelector(
-    (state) => state.ui.notification
-  );
-
-  const handleClose = () => {
-    dispatch(hideNotification());
-  };
+  const { t } = useLocale()
+  const { notification, dismiss } = useNotification()
 
   return (
     <Snackbar
       open={notification.open}
       autoHideDuration={4000}
-      onClose={handleClose}
+      onClose={dismiss}
       anchorOrigin={{
         vertical: "top",
         horizontal: "right",
@@ -27,14 +20,14 @@ const AppSnackbar = () => {
     >
       <Alert
         severity={notification.severity}
-        onClose={handleClose}
+        onClose={dismiss}
         variant="filled"
         sx={{ width: "100%" }}
       >
-        {notification.message}
+        {t(notification.message)}
       </Alert>
     </Snackbar>
   );
-};
+}
 
-export default AppSnackbar;
+export default AppSnackbar

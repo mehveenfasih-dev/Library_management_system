@@ -1,6 +1,11 @@
-import { Box, Paper } from "@mui/material";
+import { Box, Paper } from "@mui/material"
+import { Outlet, useLocation } from "react-router-dom"
+import { ROUTES } from "../../routes/routeConstants"
 
-const AuthLayout = ({ children, maxWidth = 450 }) => {
+const AuthLayout = () => {
+  const { pathname } = useLocation()
+  const maxWidth = pathname === ROUTES.REGISTER ? 700 : 450
+
   return (
     <Box
       sx={{
@@ -19,16 +24,15 @@ const AuthLayout = ({ children, maxWidth = 450 }) => {
           width: "100%",
           maxWidth,
           p: { xs: 3, sm: 4, md: 5 },
-          backgroundColor: "background.paper",
           border: "1px solid",
           borderColor: "divider",
           borderRadius: 3,
         }}
       >
-        {children}
+        <Outlet />
       </Paper>
     </Box>
-  );
-};
+  )
+}
 
-export default AuthLayout;
+export default AuthLayout

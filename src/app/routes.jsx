@@ -1,62 +1,40 @@
-import { Suspense } from "react";
-import {
-  Routes,
-  Route,
-} from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom"
 
-import { routeConfig } from "./routeConfig";
+import { routeConfig } from "./routeConfig"
+import { ROUTES } from "../routes/routeConstants"
 
-import AuthLayout from "../components/layout/AuthLayout";
-import DashboardLayout from "../components/layout/DashboardLayout";
-import LandingLayout from "../components/layout/LandingLayout";
+import AuthLayout from "../components/layout/AuthLayout"
+import MainLayout from "../components/layout/MainLayout"
+import ProtectedRoute from "../routes/ProtectedRoute"
+import RoleRoute from "../routes/RoleRoute"
+import GuestOnlyRoute from "../routes/GuestOnlyRoute"
+import NotFound from "../pages/notFound/NotFound"
 
-import ProtectedRoute from "../routes/ProtectedRoute";
+const routesFor = (access) =>
+  routeConfig
+    .filter((route) => route.access === access)
+    .map(({ path, element }) => <Route key={path} path={path} element={element} />)
 
-import PageLoader from "../components/common/PageLoader";
+const AppRoutes = () => (
+  <Routes>
+    <Route path={ROUTES.ROOT} element={<Navigate to={ROUTES.CATALOG} replace />} />
 
-// const layouts = {
-//   auth: AuthLayout,
-//   dashboard: DashboardLayout,
-//   landing: LandingLayout,
-// };
+    <Route element={<GuestOnlyRoute />}>
+      <Route element={<AuthLayout />}>{routesFor("guestOnly")}</Route>
+    </Route>
 
-const layouts = {
-  auth: AuthLayout,
-  app: AppLayout,
-};
+    <Route element={<MainLayout />}>
+      {routesFor("public")}
 
-function AppRoutes() {
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
+      <Route element={<ProtectedRoute />}>
+        {routesFor("auth")}
 
-        {routeConfig.map((route) => {
-          const Layout = layouts[route.layout];
+        <Route element={<RoleRoute role="admin" />}>{routesFor("admin")}</Route>
+      </Route>
+    </Route>
 
-          return (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={
-                <Layout {...route.layoutProps}>
-                  {route.protected ? (
-                    <ProtectedRoute
-                      permission={route.permission}
-                    >
-                      {route.element}
-                    </ProtectedRoute>
-                  ) : (
-                    route.element
-                  )}
-                </Layout>
-              }
-            />
-          );
-        })}
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+)
 
-      </Routes>
-    </Suspense>
-  );
-}
-
-export default AppRoutes;
+export default AppRoutes

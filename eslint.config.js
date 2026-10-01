@@ -1,67 +1,32 @@
-import js from "@eslint/js";
-import react from "eslint-plugin-react";
-import reactHooks from "eslint-plugin-react-hooks";
+import js from "@eslint/js"
+import globals from "globals"
+import react from "eslint-plugin-react"
+import reactHooks from "eslint-plugin-react-hooks"
+import prettier from "eslint-config-prettier"
 
 export default [
+  { ignores: ["dist", "node_modules"] },
   js.configs.recommended,
-
   {
     files: ["**/*.{js,jsx}"],
-
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-
-      globals: {
-        window: "readonly",
-        document: "readonly",
-        localStorage: "readonly",
-        console: "readonly",
-      },
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      globals: { ...globals.browser },
     },
-
-    plugins: {
-      react,
-      "react-hooks": reactHooks,
-    },
-
-    settings: {
-      react: {
-        version: "detect",
-      },
-    },
-
+    plugins: { react, "react-hooks": reactHooks },
+    settings: { react: { version: "detect" } },
     rules: {
-   
-      "no-var": "error",
-      "prefer-const": "error",
       "no-unused-vars": "error",
-      "eqeqeq": "error",
-
-     
+      eqeqeq: "error",
       "no-console": "warn",
-      "no-debugger": "error",
-
-
-      "no-redeclare": "error",
-      "no-shadow": "warn",
-      "no-unreachable": "error",
-      "no-duplicate-case": "error",
-      "no-duplicate-imports": "error",
-
-   
-      "prefer-template": "warn",
-      "prefer-arrow-callback": "warn",
-      "quotes": ["error", "double"],
-      "semi": ["warn", "never"],
-
-  
       "react/jsx-uses-vars": "error",
-      "react/react-in-jsx-scope": "off",
-
-    
+      "react/jsx-uses-react": "off",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
     },
   },
-];
+  // Must stay LAST: switches off ESLint rules that clash with Prettier's formatting
+  prettier,
+]

@@ -1,7 +1,11 @@
-import AppRoutes from "./routes";
+import { ErrorBoundary } from "react-error-boundary"
+import AppRoutes from "./routes"
+import ErrorFallback from "../components/common/ErrorFallback"
 
-const App = () => {
-  return <AppRoutes />;
-};
+const App = () => (
+  <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <AppRoutes />
+  </ErrorBoundary>
+)
 
-export default App;
+export default App

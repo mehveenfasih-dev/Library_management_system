@@ -1,20 +1,19 @@
-import { Typography, Box } from "@mui/material";
-import { useSelector } from "react-redux";
+import { Typography } from "@mui/material"
+import PageHeader from "../../components/common/PageHeader"
+import { useLocale } from "../../providers/LocaleProvider"
+import { useAuth } from "../../providers/AuthProvider"
 
+// TODO: summary cards, chart and recent activity (components/dashboard/*)
 const Dashboard = () => {
-  const user = useSelector((state) => state.auth.user);
+  const { user } = useAuth()
+  const { t } = useLocale()
 
   return (
-    <Box>
-      <Typography variant="h4">
-        Dashboard
-      </Typography>
+    <>
+      <PageHeader title="Dashboard" />
+      <Typography>{t("Welcome,")} {user?.name}</Typography>
+    </>
+  )
+}
 
-      <Typography mt={2}>
-        Welcome, {user?.name}
-      </Typography>
-    </Box>
-  );
-};
-
-export default Dashboard;
+export default Dashboard

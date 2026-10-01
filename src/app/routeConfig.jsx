@@ -1,165 +1,30 @@
-// import { lazy } from "react";
-// import { ROUTES } from "../routes/routeConstants";
+import { lazy } from "react"
+import { ROUTES } from "../routes/routeConstants"
 
-// const Login = lazy(() => import("../pages/auth/Login"));
-// const Register = lazy(() => import("../pages/auth/Register"));
-// const Contact = lazy(() => import("../pages/contact/Contact"));
+const Login = lazy(() => import("../pages/auth/Login"))
+const Register = lazy(() => import("../pages/auth/Register"))
+const Catalog = lazy(() => import("../pages/catalog/Catalog"))
+const BookDetails = lazy(() => import("../pages/books/BookDetails"))
+const MyRequests = lazy(() => import("../pages/requests/MyRequests"))
+const Profile = lazy(() => import("../pages/profile/Profile"))
+const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"))
+const Books = lazy(() => import("../pages/books/Books"))
+const Users = lazy(() => import("../pages/users/Users"))
+const AllRequests = lazy(() => import("../pages/requests/AllRequests"))
 
-// const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
-
-// const Books = lazy(() => import("../pages/books/Books"));
-// const BookDetails = lazy(() => import("../pages/books/BookDetails"));
-
-// const Library = lazy(() => import("../pages/library/Library"));
-// const Users = lazy(() => import("../pages/users/Users"));
-// const Theme = lazy(() => import("../pages/theme/Theme"));
-
-// export const routeConfig = [
-//   // ================= AUTH =================
-// {
-//   path: ROUTES.DASHBOARD,
-//   element: <Dashboard />,
-//   layout: "dashboard",
-//   protected: true,
-//   breadcrumb: "Dashboard",
-// },
-
-// {
-//   path: ROUTES.BOOKS,
-//   element: <Books />,
-//   layout: "dashboard",
-//   protected: true,
-//   permission: "view_books",
-//   breadcrumb: "Books",
-// },
-
-// {
-//   path: ROUTES.BOOK_DETAILS,
-//   element: <BookDetails />,
-//   layout: "dashboard",
-//   protected: true,
-//   permission: "view_books",
-//   breadcrumb: "Book Details",
-// },
-
-// {
-//   path: ROUTES.LIBRARY,
-//   element: <Library />,
-//   layout: "dashboard",
-//   protected: true,
-//   permission: "manage_library",
-//   breadcrumb: "Library",
-// },
-
-// {
-//   path: ROUTES.USERS,
-//   element: <Users />,
-//   layout: "dashboard",
-//   protected: true,
-//   permission: "manage_users",
-//   breadcrumb: "Users",
-// },
-
-// {
-//   path: ROUTES.THEME,
-//   element: <Theme />,
-//   layout: "dashboard",
-//   protected: true,
-//   permission: "manage_theme",
-//   breadcrumb: "Theme",
-// },
-// ]
-
-
-
+// access: "guestOnly" | "public" | "auth" (any signed in user) | "admin"
 export const routeConfig = [
-  // ================= AUTH =================
+  { path: ROUTES.LOGIN, element: <Login />, access: "guestOnly", breadcrumb: "Login" },
+  { path: ROUTES.REGISTER, element: <Register />, access: "guestOnly", breadcrumb: "Register" },
 
-  {
-    path: ROUTES.LOGIN,
-    element: <Login />,
-    layout: "auth",
-    protected: false,
-  },
+  { path: ROUTES.CATALOG, element: <Catalog />, access: "public", breadcrumb: "Catalog" },
+  { path: ROUTES.BOOK_DETAILS, element: <BookDetails />, access: "public", breadcrumb: "Book details" },
 
-  {
-    path: ROUTES.REGISTER,
-    element: <Register />,
-    layout: "auth",
-    protected: false,
-  },
+  { path: ROUTES.MY_REQUESTS, element: <MyRequests />, access: "auth", breadcrumb: "My requests" },
+  { path: ROUTES.PROFILE, element: <Profile />, access: "auth", breadcrumb: "Profile" },
 
-  // ================= PUBLIC =================
-
-  {
-    path: ROUTES.CATALOG,
-    element: <Catalog />,
-    layout: "app",
-    protected: false,
-    breadcrumb: "Catalog",
-  },
-
-  {
-    path: ROUTES.BOOK_DETAILS,
-    element: <BookDetails />,
-    layout: "app",
-    protected: false,
-    breadcrumb: "Book Details",
-  },
-
-  // ================= MEMBER =================
-
-  {
-    path: ROUTES.MY_REQUESTS,
-    element: <MyRequests />,
-    layout: "app",
-    protected: true,
-    breadcrumb: "My Requests",
-  },
-
-  {
-    path: ROUTES.PROFILE,
-    element: <Profile />,
-    layout: "app",
-    protected: true,
-    breadcrumb: "Profile",
-  },
-
-  // ================= ADMIN =================
-
-  {
-    path: ROUTES.DASHBOARD,
-    element: <Dashboard />,
-    layout: "app",
-    protected: true,
-    role: "admin",
-    breadcrumb: "Dashboard",
-  },
-
-  {
-    path: ROUTES.BOOKS,
-    element: <Books />,
-    layout: "app",
-    protected: true,
-    role: "admin",
-    breadcrumb: "Books",
-  },
-
-  {
-    path: ROUTES.USERS,
-    element: <Users />,
-    layout: "app",
-    protected: true,
-    role: "admin",
-    breadcrumb: "Users",
-  },
-
-  {
-    path: ROUTES.ALL_REQUESTS,
-    element: <AllRequests />,
-    layout: "app",
-    protected: true,
-    role: "admin",
-    breadcrumb: "All Requests",
-  },
-];
+  { path: ROUTES.DASHBOARD, element: <Dashboard />, access: "admin", breadcrumb: "Dashboard" },
+  { path: ROUTES.BOOKS, element: <Books />, access: "admin", breadcrumb: "Books" },
+  { path: ROUTES.USERS, element: <Users />, access: "admin", breadcrumb: "Users" },
+  { path: ROUTES.ALL_REQUESTS, element: <AllRequests />, access: "admin", breadcrumb: "All requests" },
+]

@@ -1,245 +1,169 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect } from "react"
+import PropTypes from "prop-types"
+import { Box, Button, Chip, Divider, Paper, Stack, Typography } from "@mui/material"
+import { MenuBook } from "@mui/icons-material"
+import { Link as RouterLink, useParams } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
 
+import BookCover from "../../components/books/BookCover"
+import BookDetailsSkeleton from "../../components/books/BooksDetailSkeleton"
+import { BookGrid } from "../../components/books/BookGrid"
+import ErrorState from "../../components/common/ErrorState"
+
+import { createRequest } from "../../store/slices/requestSlice"
+import { useLocale } from "../../providers/LocaleProvider"
+import { useAuth } from "../../providers/AuthProvider"
+import { useNotification } from "../../providers/NotificationProvider"
 import {
-  Box,
-  Button,
-  Paper,
-  Typography,
-} from "@mui/material";
+  clearBookDetail,
+  fetchBookById,
+  fetchRelatedBooks,
+  selectBookDetail,
+  selectRelatedBooks,
+} from "../../store/slices/bookSlice"
+import { ROUTES } from "../../routes/routeConstants"
 
-import {
-  Link,
-  useParams,
-} from "react-router-dom";
+const Meta = ({ label, value }) => {
+  const { t } = useLocale()
 
-import { getBookById } from "../../services/bookService";
-import { ROUTES } from "../../routes/routeConstants";
+  return <Box>
+    <Typography variant="caption" color="text.secondary">
+      {t(label)}
+    </Typography>
+    <Typography fontWeight={500}>{value}</Typography>
+  </Box>
+}
 
-import BookDetailsSkeleton from "../../components/books/BooksDetailSkeleton";
+Meta.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+}
 
 const BookDetails = () => {
-  const { id } = useParams();
+  const { id } = useParams()
+  const dispatch = useDispatch()
+  const { t } = useLocale()
+  const { isAuthenticated, user } = useAuth()
+  const { notify } = useNotification()
+  const creatingRequest = useSelector((state) => state.requests.creating)
+  const { book, status, error } = useSelector(selectBookDetail)
+  const related = useSelector(selectRelatedBooks)
 
-  const [book, setBook] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [imageError, setImageError] = useState(false);
+  const load = useCallback(() => dispatch(fetchBookById(id)), [dispatch, id])
 
   useEffect(() => {
-    const fetchBook = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        setBook(null);
-        setImageError(false);
+    const request = load()
 
-        const data = await getBookById(id);
+    return () => {
+      request.abort()
+      dispatch(clearBookDetail())
+    }
+  }, [load, dispatch])
 
-        setBook(data);
-      } catch (error) {
-        console.error("BOOK DETAILS ERROR:", error);
+  useEffect(() => {
+    if (!book) return undefined
 
-        setError(
-          error.message || "Failed to load book details."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+    const request = dispatch(fetchRelatedBooks(book))
+    return () => request.abort()
+  }, [dispatch, book])
 
-    fetchBook();
-  }, [id]);
-
-  if (loading) {
-    return <BookDetailsSkeleton />;
+  const handleBorrow = async () => {
+    try {
+      await dispatch(createRequest({ book, user })).unwrap()
+      notify("Borrow request submitted.")
+    } catch (error) {
+      notify(error || "Could not submit the request.", "error")
+    }
   }
 
-  
+  if (status === "loading" || status === "idle") return <BookDetailsSkeleton />
 
-  if (error) {
-    return (
-      <Paper
-        sx={{
-          p: 4,
-          border: "1px solid",
-          borderColor: "divider",
-          textAlign: "center",
-        }}
-      >
-        <Typography
-          variant="h6"
-          fontWeight={600}
-          mb={1}
-        >
-          Something went wrong
-        </Typography>
-
-        <Typography
-          color="text.secondary"
-          mb={3}
-        >
-          {error}
-        </Typography>
-
-        <Button
-          component={Link}
-          to={ROUTES.BOOKS}
-          variant="outlined"
-        >
-          Back to Books
-        </Button>
-      </Paper>
-    );
-  }
-
-  if (!book) {
-    return (
-      <Paper
-        sx={{
-          p: 4,
-          border: "1px solid",
-          borderColor: "divider",
-          textAlign: "center",
-        }}
-      >
-        <Typography
-          variant="h6"
-          fontWeight={600}
-          mb={1}
-        >
-          Book not found
-        </Typography>
-
-        <Typography
-          color="text.secondary"
-          mb={3}
-        >
-          We couldn't find the requested book.
-        </Typography>
-
-        <Button
-          component={Link}
-          to={ROUTES.BOOKS}
-          variant="outlined"
-        >
-          Back to Books
-        </Button>
-      </Paper>
-    );
+  if (status === "failed") {
+    return <ErrorState title="Could not load this book" message={error} onRetry={load} />
   }
 
   return (
-    <Paper
-      sx={{
-        p: {
-          xs: 2,
-          sm: 3,
-          md: 4,
-        },
+    <Box>
+      <Paper elevation={0} sx={{ p: { xs: 2, md: 4 }, border: "1px solid", borderColor: "divider" }}>
+        <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
+          <Box sx={{ width: { xs: "100%", md: 280 }, flexShrink: 0, display: "flex", justifyContent: "center" }}>
+            <BookCover
+              src={book.image}
+              alt={book.title}
+              sx={{ width: "100%", maxWidth: 280, height: 400, borderRadius: 2 }}
+            />
+          </Box>
 
-        border: "1px solid",
-        borderColor: "divider",
-      }}
-    >
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="h4" fontWeight={700} gutterBottom>
+              {book.title}
+            </Typography>
 
-      <Box
-        sx={{
-          display: "flex",
-          gap: 4,
-          flexWrap: "wrap",
-        }}
-      >
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              {book.author}
+            </Typography>
 
-        <Box
-          sx={{
-            width: {
-              xs: "100%",
-              sm: 220,
-            },
+            <Stack direction="row" spacing={1} sx={{ mb: 3, flexWrap: "wrap", rowGap: 1 }}>
+              <Chip label={t(book.category)} color="primary" variant="outlined" />
+              <Chip
+                label={book.available ? t("Available · {copies} copies").replace("{copies}", book.copies) : t("Unavailable")}
+                color={book.available ? "success" : "error"}
+              />
+            </Stack>
 
-            height: 320,
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
+              <Meta label="Year" value={book.year} />
+              <Meta label="ISBN" value={book.isbn} />
+              <Meta label="Publisher" value={book.publisher} />
+              <Meta label="Pages" value={book.pages ?? "N/A"} />
+            </Box>
 
-            flexShrink: 0,
+            <Typography variant="h6" fontWeight={600} gutterBottom>
+              {t("Description")}
+            </Typography>
 
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+            <Typography color="text.secondary" sx={{ lineHeight: 1.8, mb: 4 }}>
+              {book.description}
+            </Typography>
 
-          <Box
-            component="img"
-            src={
-              imageError
-                ? "https://via.placeholder.com/220x320?text=No+Cover"
-                : book.image
-            }
-            alt={book.title}
-            onError={() => setImageError(true)}
-            sx={{
-              width: 220,
-              height: 320,
-              objectFit: "cover",
-              borderRadius: 1,
-              display: "block",
-            }}
-          />
+            {isAuthenticated ? (
+              user?.role !== "admin" && (
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<MenuBook />}
+                  disabled={!book.available || creatingRequest}
+                  onClick={handleBorrow}
+                  color={book.available ? "primary" : "inherit"}
+                >
+                  {!book.available
+                    ? t("Currently unavailable")
+                    : creatingRequest
+                      ? t("Submitting...")
+                      : t("Request to borrow")}
+                </Button>
+              )
+            ) : (
+              <Button variant="contained" size="large" component={RouterLink} to={ROUTES.LOGIN}>
+                {t("Sign in to borrow")}
+              </Button>
+            )}
+          </Box>
 
+        </Stack>
+      </Paper>
+
+      {related.items.length > 0 && (
+        <Box sx={{ mt: 5 }}>
+          <Divider sx={{ mb: 3 }} />
+          <Typography variant="h6" fontWeight={600} mb={2}>
+            {t("Related books")}
+          </Typography>
+          <BookGrid books={related.items} />
         </Box>
+      )}
+    </Box>
+  )
+}
 
-        <Box
-          sx={{
-            flex: 1,
-            minWidth: {
-              xs: "100%",
-              sm: 280,
-            },
-          }}
-        >
-
-          <Typography
-            variant="h4"
-            fontWeight={600}
-            mb={2}
-          >
-            {book.title}
-          </Typography>
-
-          <Typography mb={1}>
-            <strong>Author:</strong>{" "}
-            {book.author}
-          </Typography>
-
-          <Typography mb={2}>
-            <strong>Category:</strong>{" "}
-            {book.category}
-          </Typography>
-
-          <Typography
-            color="text.secondary"
-            sx={{
-              lineHeight: 1.8,
-            }}
-          >
-            {book.description}
-          </Typography>
-
-          <Button
-            component={Link}
-            to={ROUTES.BOOKS}
-            variant="outlined"
-            sx={{
-              mt: 3,
-            }}
-          >
-            Back to Books
-          </Button>
-
-        </Box>
-
-      </Box>
-
-    </Paper>
-  );
-};
-
-export default BookDetails;
+export default BookDetails
