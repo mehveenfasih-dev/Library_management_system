@@ -1,3 +1,5 @@
+import { env } from "../config/env"
+import { API_ENDPOINTS } from "../constants/api"
 import { delay } from "../utils/delay"
 import { readUsers, toPublicUser, writeUsers } from "./mock/usersDb"
 import { loginWithMockUser } from "./dummyUsers"
@@ -19,7 +21,7 @@ export const loginRequest = async ({ email, password }) => {
 
 export const registerRequest = async (data) => {
   if (!env.useMock) {
-    const { data: user } = await apiClient.post("/auth/register", data)
+    const { data: user } = await apiClient.post(API_ENDPOINTS.AUTH.REGISTER, data)
     return user
   }
 

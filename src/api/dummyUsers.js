@@ -1,6 +1,7 @@
 import { delay } from "../utils/delay"
 import { readOverrides } from "./mock/usersDb"
 import { env } from "../config/env"
+import { API_ENDPOINTS } from "../constants/api"
 import apiClient from "./axiosInstance"
 import { MOCK_USERS } from "./mock/usersData"
 
@@ -16,7 +17,7 @@ const toMockUser = (user) => ({
 
 export const loginWithMockUser = async (identifier, password) => {
   if (!env.useMock) {
-    const { data } = await apiClient.post("/auth/login", { identifier, password }, { skipLoader: true, skipToast: true })
+    const { data } = await apiClient.post(API_ENDPOINTS.AUTH.LOGIN, { identifier, password }, { skipLoader: true, skipToast: true })
     return { user: data.user, token: data.token ?? "cookie-session" }
   }
 

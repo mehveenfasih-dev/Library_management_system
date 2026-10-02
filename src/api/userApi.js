@@ -2,6 +2,7 @@ import { delay } from "../utils/delay"
 import { readOverrides, readUsers, toPublicUser, writeOverrides, writeUsers } from "./mock/usersDb"
 import { getMockUsers } from "./dummyUsers"
 import { env } from "../config/env"
+import { API_ENDPOINTS, buildApiPath } from "../constants/api"
 import apiClient from "./axiosInstance"
 
 const getEveryUser = async () => {
@@ -13,7 +14,7 @@ const getEveryUser = async () => {
 
 export const getUsers = async ({ search = "", role = "", page = 1, limit = 8 } = {}) => {
   if (!env.useMock) {
-    const { data } = await apiClient.get("/users", { params: { search, role, page, limit } })
+    const { data } = await apiClient.get(API_ENDPOINTS.USERS, { params: { search, role, page, limit } })
     return { items: (data.items ?? []).map(toPublicUser), total: data.total ?? 0 }
   }
 
@@ -32,7 +33,7 @@ export const getUsers = async ({ search = "", role = "", page = 1, limit = 8 } =
 
 export const updateUserStatus = async (id, active) => {
   if (!env.useMock) {
-    const { data } = await apiClient.patch(`/users/${id}/status`, { active })
+    const { data } = await apiClient.patch(buildApiPath.userStatus(id), { active })
     return data
   }
 

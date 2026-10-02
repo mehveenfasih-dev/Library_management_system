@@ -1,4 +1,5 @@
 import { STORAGE_KEYS } from "../constants/app"
+import { API_ENDPOINTS, buildApiPath } from "../constants/api"
 import { delay } from "../utils/delay"
 import { readJSON, removeKey, writeJSON } from "../utils/storage"
 import { FALLBACK_COVER } from "../constants/images"
@@ -32,7 +33,7 @@ export const getBooks = async ({
   signal,
 } = {}) => {
   if (!env.useMock) {
-    const { data } = await apiClient.get("/books", {
+    const { data } = await apiClient.get(API_ENDPOINTS.BOOKS, {
       params: { search, category, sort, startIndex, limit },
       signal,
     })
@@ -56,7 +57,7 @@ export const getBooks = async ({
 
 export const getBookById = async (id, { signal } = {}) => {
   if (!env.useMock) {
-    const { data } = await apiClient.get(`/books/${id}`, { signal })
+    const { data } = await apiClient.get(buildApiPath.bookById(id), { signal })
     return mapBook(data)
   }
 
@@ -68,7 +69,7 @@ export const getBookById = async (id, { signal } = {}) => {
 
 export const getRelatedBooks = async (book, { signal } = {}) => {
   if (!env.useMock) {
-    const { data } = await apiClient.get(`/books/${book.id}/related`, { signal })
+    const { data } = await apiClient.get(buildApiPath.relatedBooks(book.id), { signal })
     return (data.items ?? []).map(mapBook).slice(0, 4)
   }
 
@@ -78,7 +79,7 @@ export const getRelatedBooks = async (book, { signal } = {}) => {
 
 export const createBook = async (payload) => {
   if (!env.useMock) {
-    const { data } = await apiClient.post("/books", payload)
+    const { data } = await apiClient.post(API_ENDPOINTS.BOOKS, payload)
     return mapBook(data)
   }
 
@@ -91,7 +92,7 @@ export const createBook = async (payload) => {
 
 export const updateBook = async (id, payload) => {
   if (!env.useMock) {
-    const { data } = await apiClient.put(`/books/${id}`, payload)
+    const { data } = await apiClient.put(buildApiPath.bookById(id), payload)
     return mapBook(data)
   }
 
@@ -105,7 +106,7 @@ export const updateBook = async (id, payload) => {
 
 export const deleteBook = async (id) => {
   if (!env.useMock) {
-    await apiClient.delete(`/books/${id}`)
+    await apiClient.delete(buildApiPath.bookById(id))
     return id
   }
 
