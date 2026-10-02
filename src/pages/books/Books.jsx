@@ -51,20 +51,23 @@ const Books = () => {
   const [deleting, setDeleting] = useState(false)
 
   const search = useDebounce(searchInput, 500).trim()
-  const { items, total, status, error, saving, loadMore, reload } = useBooksPage(search, sort)
-  const hasMore = items.length < total
+  const { books, total, status, error, loadMore, reload } = useBooksPage(search, sort)
+  const [saving, setSaving] = useState(false)
+  const hasMore = books.length < total
   const sentinelRef = useInfiniteScroll(loadMore, hasMore && status === "succeeded")
 
-  const books = useMemo(() => {
-    if (!order) return items
+  const displayBooks = useMemo(() => {
+    if (!order) return books
 
-    const sorted = [...items].sort((a, b) => a.title.localeCompare(b.title))
+    const sorted = [...books].sort((a, b) => a.title.localeCompare(b.title))
     return order === "asc" ? sorted : sorted.reverse()
-  }, [items, order])
+  }, [books, order])
 
   const toggleOrder = () => setOrder((prev) => (prev === "asc" ? "desc" : "asc"))
 
   const handleSave = async (values) => {
+    setSaving(true)
+
     try {
       if (formBook) {
         await dispatch(editBook({ id: formBook.id, changes: values })).unwrap()
@@ -78,6 +81,8 @@ const Books = () => {
       setFormBook(undefined)
     } catch {
       notify("Could not save the book.", "error")
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -96,7 +101,7 @@ const Books = () => {
     }
   }
 
-  const isLoading = (status === "loading" || status === "idle") && items.length === 0
+  const isLoading = (status === "loading" || status === "idle") && books.length === 0
 
   const renderBody = () => {
     if (isLoading) {
@@ -118,21 +123,21 @@ const Books = () => {
       )
     }
 
-    if (status === "failed" && items.length === 0) {
+    if (status === "failed" && books.length === 0) {
       return <ErrorState title="Could not load books" message={error} onRetry={reload} />
     }
 
-    if (items.length === 0) {
+    if (books.length === 0) {
       return <EmptyState title="No books found" message="Try a different search or add a new book." />
     }
 
     return (
       <>
         <BookTable
-          books={books}
+          books={displayBooks}
           order={order}
           onToggleOrder={toggleOrder}
-          loadingMore={status === "loading" && items.length > 0}
+          loadingMore={status === "loading" && books.length > 0}
           onEdit={setFormBook}
           onDelete={setBookToDelete}
         />

@@ -6,7 +6,6 @@ import {
   Language,
   Logout,
   Menu as MenuIcon,
-  NotificationsNone,
   Person,
 } from "@mui/icons-material"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
@@ -90,10 +89,6 @@ const Header = ({ guest = false, onMenuClick }) => {
 
           {!guest && (
             <>
-              <IconButton color="inherit" aria-label={t("Notifications")}>
-                <NotificationsNone />
-              </IconButton>
-
               <IconButton onClick={(event) => setAnchor(event.currentTarget)} aria-label={t("Account menu")}>
                 <Avatar sx={{ width: 34, height: 34, bgcolor: "primary.main", fontSize: 15 }}>
                   {user?.name?.charAt(0).toUpperCase()}

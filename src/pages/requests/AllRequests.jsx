@@ -13,7 +13,7 @@ const AllRequests = () => {
 	const dispatch = useDispatch()
 	const { t } = useLocale()
 	const { notify } = useNotification()
-	const { items, status, error } = useSelector(selectRequests)
+	const { requests, status, error } = useSelector(selectRequests)
 	const load = useCallback(() => dispatch(fetchAllRequests()), [dispatch])
 
 	useEffect(() => {
@@ -40,15 +40,15 @@ const AllRequests = () => {
 		content = <ErrorState title="Could not load requests" message={error} onRetry={load} />
 	} else if (status === "loading" || status === "idle") {
 		content = <RequestTable requests={[]} isAdmin />
-	} else if (!items.length) {
+	} else if (!requests.length) {
 		content = <EmptyState title="No borrow requests" message="Member requests will appear here." />
 	} else {
-		content = <RequestTable requests={items} isAdmin onUpdateStatus={handleUpdateStatus} />
+		content = <RequestTable requests={requests} isAdmin onUpdateStatus={handleUpdateStatus} />
 	}
 
 	return (
 		<>
-			<PageHeader title="All requests" subtitle="Review and manage member borrow requests." />
+			<PageHeader title="Book requests" subtitle="Review and manage member borrow requests." />
 			{content}
 		</>
 	)

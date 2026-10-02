@@ -18,7 +18,7 @@ const fetchPending = (state) => {
 }
 
 const fetchFulfilled = (state, action) => {
-  state.items = action.payload
+  state.requests = action.payload
   state.status = "succeeded"
 }
 
@@ -29,7 +29,7 @@ const fetchRejected = (state, action) => {
 
 const requestSlice = createSlice({
   name: "requests",
-  initialState: { items: [], status: "idle", error: null, creating: false },
+  initialState: { requests: [], status: "idle", error: null, creating: false },
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -44,27 +44,27 @@ const requestSlice = createSlice({
       })
       .addCase(createRequest.fulfilled, (state, action) => {
         state.creating = false
-        state.items.unshift(action.payload)
+        state.requests.unshift(action.payload)
       })
       .addCase(createRequest.rejected, (state) => {
         state.creating = false
       })
       .addCase(updateRequestStatus.pending, (state, action) => {
-        const request = state.items.find((item) => item.id === action.meta.arg.id)
+        const request = state.requests.find((item) => item.id === action.meta.arg.id)
         if (!request) return
         request.previousStatus = request.status
         request.status = action.meta.arg.status
         request.updating = true
       })
       .addCase(updateRequestStatus.fulfilled, (state, action) => {
-        const request = state.items.find((item) => item.id === action.payload.id)
+        const request = state.requests.find((item) => item.id === action.payload.id)
         if (!request) return
         Object.assign(request, action.payload)
         delete request.previousStatus
         request.updating = false
       })
       .addCase(updateRequestStatus.rejected, (state, action) => {
-        const request = state.items.find((item) => item.id === action.meta.arg.id)
+        const request = state.requests.find((item) => item.id === action.meta.arg.id)
         if (!request) return
         request.status = request.previousStatus
         delete request.previousStatus

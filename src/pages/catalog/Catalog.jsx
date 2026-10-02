@@ -18,7 +18,7 @@ import { CATALOG_MAX_PAGES, CATALOG_PAGE_SIZE, SORT_OPTIONS } from "../../consta
 const Catalog = () => {
   const dispatch = useDispatch()
   const { t } = useLocale()
-  const { items, total, status, error } = useSelector(selectCatalog)
+  const { books, total, status, error } = useSelector(selectCatalog)
   const { filters, update, clear } = useCatalogFilters()
 
   const [searchInput, setSearchInput] = useState(filters.search)
@@ -41,9 +41,9 @@ const Catalog = () => {
     return () => request.abort()
   }, [load])
 
-  const books = useMemo(
-    () => (availableOnly ? items.filter((book) => book.available) : items),
-    [items, availableOnly]
+  const visibleBooks = useMemo(
+    () => (availableOnly ? books.filter((book) => book.available) : books),
+    [books, availableOnly]
   )
 
   const totalPages = Math.min(Math.ceil(total / CATALOG_PAGE_SIZE), CATALOG_MAX_PAGES)
@@ -66,7 +66,7 @@ const Catalog = () => {
       return <ErrorState title="Could not load books" message={error} onRetry={load} />
     }
 
-    if (books.length === 0) {
+    if (visibleBooks.length === 0) {
       return (
         <EmptyState
           title="No books match your filters"
@@ -77,7 +77,7 @@ const Catalog = () => {
       )
     }
 
-    return <BookGrid books={books} />
+    return <BookGrid books={visibleBooks} />
   }
 
   return (
@@ -107,7 +107,7 @@ const Catalog = () => {
       {status === "succeeded" && books.length > 0 && (
         <Typography variant="body2" color="text.secondary" mb={2}>
           {t("Showing {shown} of about {total} books")
-            .replace("{shown}", books.length)
+            .replace("{shown}", visibleBooks.length)
             .replace("{total}", total.toLocaleString())}
         </Typography>
       )}

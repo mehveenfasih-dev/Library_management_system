@@ -1,25 +1,85 @@
-import { useCallback, useEffect } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { fetchBooksPage, resetBooksPage, selectBooksPage } from "../store/slices/bookSlice"
+import { useCallback, useEffect, useState } from "react"
+import { getBooks } from "../api/bookApi"
+import { BOOKS_PAGE_SIZE } from "../constants/app"
+
+const initialState = {
+  books: [],
+  total: 0,
+  page: 0,
+  status: "idle",
+  error: null,
+}
 
 const useBooksPage = (search, sort) => {
-  const dispatch = useDispatch()
-  const state = useSelector(selectBooksPage)
+  const [state, setState] = useState(initialState)
 
-  const reload = useCallback(() => {
-    dispatch(resetBooksPage())
-    return dispatch(fetchBooksPage({ search, sort, page: 1 }))
-  }, [dispatch, search, sort])
+  const reload = useCallback(async () => {
+    setState((prev) => ({ ...prev, status: "loading", error: null }))
 
-  const loadMore = useCallback(() => {
-    if (state.status === "loading" || state.items.length >= state.total) return undefined
-    return dispatch(fetchBooksPage({ search, sort, page: state.page + 1 }))
-  }, [dispatch, search, sort, state.items.length, state.page, state.status, state.total])
+    try {
+      const payload = await getBooks({
+        search,
+        sort,
+        startIndex: 0,
+        limit: BOOKS_PAGE_SIZE,
+      })
+
+      setState({
+        books: payload.items,
+        total: payload.total,
+        page: 1,
+        status: "succeeded",
+        error: null,
+      })
+
+      return payload
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        status: "failed",
+        error: error.message || "Failed to load books.",
+      }))
+      return null
+    }
+  }, [search, sort])
+
+  const loadMore = useCallback(async () => {
+    if (state.status === "loading" || state.books.length >= state.total) return undefined
+
+    const nextPage = state.page + 1
+
+    setState((prev) => ({ ...prev, status: "loading", error: null }))
+
+    try {
+      const payload = await getBooks({
+        search,
+        sort,
+        startIndex: (nextPage - 1) * BOOKS_PAGE_SIZE,
+        limit: BOOKS_PAGE_SIZE,
+      })
+
+      setState((prev) => ({
+        ...prev,
+        books: [...prev.books, ...payload.items],
+        total: payload.total,
+        page: nextPage,
+        status: "succeeded",
+        error: null,
+      }))
+
+      return payload
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        status: "failed",
+        error: error.message || "Could not load more books.",
+      }))
+      return null
+    }
+  }, [search, sort, state.books.length, state.page, state.status, state.total])
 
   useEffect(() => {
-    const request = reload()
-
-    return () => request.abort()
+    reload()
   }, [reload])
 
   return { ...state, loadMore, reload }

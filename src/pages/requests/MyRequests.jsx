@@ -11,7 +11,7 @@ import { useAuth } from "../../providers/AuthProvider"
 const MyRequests = () => {
 	const dispatch = useDispatch()
 	const { user } = useAuth()
-	const { items, status, error } = useSelector(selectRequests)
+	const { requests, status, error } = useSelector(selectRequests)
 	const load = useCallback(() => dispatch(fetchMyRequests(user.id)), [dispatch, user.id])
 
 	useEffect(() => {
@@ -24,10 +24,10 @@ const MyRequests = () => {
 		content = <ErrorState title="Could not load requests" message={error} onRetry={load} />
 	} else if (status === "loading" || status === "idle") {
 		content = <RequestTable requests={[]} />
-	} else if (!items.length) {
+	} else if (!requests.length) {
 		content = <EmptyState title="No borrow requests yet" message="Requests you make from a book page will appear here." />
 	} else {
-		content = <RequestTable requests={items} />
+		content = <RequestTable requests={requests} />
 	}
 
 	return (

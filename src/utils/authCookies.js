@@ -7,22 +7,47 @@ const COOKIE_KEYS = {
   TOKEN: "lms_token",
 }
 
+const encodeCookieValue = (value) => {
+  const text = typeof value === "string" ? value : JSON.stringify(value)
+  const bytes = new TextEncoder().encode(text)
+  let binary = ""
+
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte)
+  })
+
+  return btoa(binary)
+}
+
+const decodeCookieValue = (value) => {
+  if (!value) return null
+
+  try {
+    const binary = atob(value)
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
+    return new TextDecoder().decode(bytes)
+  } catch {
+    return null
+  }
+}
+
 const cookieOptions = (maxAge) =>
+  // HttpOnly cannot be set from browser JavaScript; it must be added by the server via Set-Cookie.
   `Path=/; Max-Age=${maxAge}; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`
 
 const readCookie = (key) => {
   if (typeof document === "undefined") return null
   const cookie = document.cookie.split("; ").find((item) => item.startsWith(`${key}=`))
-  return cookie ? decodeURIComponent(cookie.slice(key.length + 1)) : null
+  return cookie ? decodeCookieValue(cookie.slice(key.length + 1)) : null
 }
 
 export const readAuthToken = () => readCookie(COOKIE_KEYS.TOKEN)
 
 export const writeAuthCookies = ({ user, token }) => {
   const options = cookieOptions(60 * 60 * 24 * 7)
-  document.cookie = `${COOKIE_KEYS.USER}=${encodeURIComponent(JSON.stringify(user))}; ${options}`
-  document.cookie = `${COOKIE_KEYS.AUTHENTICATED}=true; ${options}`
-  document.cookie = `${COOKIE_KEYS.TOKEN}=${encodeURIComponent(token)}; ${options}`
+  document.cookie = `${COOKIE_KEYS.USER}=${encodeCookieValue(JSON.stringify(user))}; ${options}`
+  document.cookie = `${COOKIE_KEYS.AUTHENTICATED}=${encodeCookieValue("true")}; ${options}`
+  document.cookie = `${COOKIE_KEYS.TOKEN}=${encodeCookieValue(token)}; ${options}`
 }
 
 export const clearAuthCookies = () => {

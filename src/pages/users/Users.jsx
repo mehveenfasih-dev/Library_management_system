@@ -21,7 +21,7 @@ const Users = () => {
   const { t } = useLocale()
   const { user: currentUser } = useAuth()
   const { notify } = useNotification()
-  const { items, total, status, error } = useSelector(selectUsers)
+  const { users, total, status, error } = useSelector(selectUsers)
 
   const [searchInput, setSearchInput] = useState("")
   const [role, setRole] = useState("")
@@ -68,11 +68,11 @@ const Users = () => {
   const renderBody = () => {
     if (status === "failed") return <ErrorState title="Could not load users" message={error} onRetry={load} />
 
-    if (!loading && items.length === 0) {
+    if (!loading && users.length === 0) {
       return <EmptyState title="No users found" message="Try a different search or role filter." />
     }
 
-    return <UserTable users={items} loading={loading} currentUserId={currentUser?.id} onToggle={handleToggle} />
+    return <UserTable users={users} loading={loading} currentUserId={currentUser?.id} onToggle={handleToggle} />
   }
 
   return (

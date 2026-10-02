@@ -138,9 +138,10 @@ const memberItems = [
 
 const adminItems = [
   { label: "Dashboard", path: ROUTES.DASHBOARD, icon: <Dashboard />, activeFor: [ROUTES.DASHBOARD] },
-  { label: "Books", path: ROUTES.BOOKS, icon: <LibraryBooks />, activeFor: [ROUTES.BOOKS] },
+  { label: "Catalog", path: ROUTES.CATALOG, icon: <MenuBook />, activeFor: [ROUTES.CATALOG, ROUTES.BOOK_DETAILS] },
+  { label: "Manage Books", path: ROUTES.BOOKS, icon: <LibraryBooks />, activeFor: [ROUTES.BOOKS] },
   { label: "Users", path: ROUTES.USERS, icon: <People />, activeFor: [ROUTES.USERS] },
-  { label: "All requests", path: ROUTES.ALL_REQUESTS, icon: <RequestPage />, activeFor: [ROUTES.ALL_REQUESTS] },
+  { label: "Book requests", path: ROUTES.ALL_REQUESTS, icon: <RequestPage />, activeFor: [ROUTES.ALL_REQUESTS] },
 ]
 
 const NavSection = ({ title, items, onNavigate }) => {
@@ -184,14 +185,12 @@ NavSection.propTypes = {
 
 const SidebarContent = ({ onNavigate }) => {
   const { isAdmin } = useAuth()
+  const sectionTitle = isAdmin ? "Admin" : "Member"
+  const sidebarItems = isAdmin ? adminItems : memberItems
 
   return (
     <Box sx={{ width: DRAWER_WIDTH }}>
-      {isAdmin ? (
-        <NavSection title="Admin" items={adminItems} onNavigate={onNavigate} />
-      ) : (
-        <NavSection title="Member" items={memberItems} onNavigate={onNavigate} />
-      )}
+      <NavSection title={sectionTitle} items={sidebarItems} onNavigate={onNavigate} />
     </Box>
   )
 }

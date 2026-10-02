@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useState } from "react"
 import PropTypes from "prop-types"
 import { Box, Button, Chip, Divider, Paper, Stack, Typography } from "@mui/material"
 import { MenuBook } from "@mui/icons-material"
@@ -10,17 +10,11 @@ import BookDetailsSkeleton from "../../components/books/BooksDetailSkeleton"
 import { BookGrid } from "../../components/books/BookGrid"
 import ErrorState from "../../components/common/ErrorState"
 
-import { createRequest } from "../../store/slices/requestSlice"
+import { getBookById, getRelatedBooks } from "../../api/bookApi"
+import { createRequest, fetchMyRequests } from "../../store/slices/requestSlice"
 import { useLocale } from "../../providers/LocaleProvider"
 import { useAuth } from "../../providers/AuthProvider"
 import { useNotification } from "../../providers/NotificationProvider"
-import {
-  clearBookDetail,
-  fetchBookById,
-  fetchRelatedBooks,
-  selectBookDetail,
-  selectRelatedBooks,
-} from "../../store/slices/bookSlice"
 import { ROUTES } from "../../routes/routeConstants"
 
 const Meta = ({ label, value }) => {
@@ -46,28 +40,58 @@ const BookDetails = () => {
   const { isAuthenticated, user } = useAuth()
   const { notify } = useNotification()
   const creatingRequest = useSelector((state) => state.requests.creating)
-  const { book, status, error } = useSelector(selectBookDetail)
-  const related = useSelector(selectRelatedBooks)
+  const userRequests = useSelector((state) => state.requests.requests)
+  const [book, setBook] = useState(null)
+  const [related, setRelated] = useState([])
+  const [status, setStatus] = useState("idle")
+  const [error, setError] = useState(null)
 
-  const load = useCallback(() => dispatch(fetchBookById(id)), [dispatch, id])
+  const hasActiveRequestForBook =
+    isAuthenticated &&
+    user?.id &&
+    book &&
+    userRequests.some(
+      (request) =>
+        request.userId === user.id &&
+        request.bookId === book.id &&
+        ["pending", "approved", "overdue"].includes(request.status)
+    )
 
-  useEffect(() => {
-    const request = load()
+  const load = useCallback(async () => {
+    setStatus("loading")
+    setError(null)
 
-    return () => {
-      request.abort()
-      dispatch(clearBookDetail())
+    try {
+      const nextBook = await getBookById(id)
+      setBook(nextBook)
+
+      try {
+        const relatedBooks = await getRelatedBooks(nextBook)
+        setRelated(relatedBooks)
+      } catch {
+        setRelated([])
+      }
+
+      setStatus("succeeded")
+    } catch (loadError) {
+      setStatus("failed")
+      setError(loadError.message || "Failed to load the book.")
     }
-  }, [load, dispatch])
+  }, [id])
 
   useEffect(() => {
-    if (!book) return undefined
+    load()
+  }, [load])
 
-    const request = dispatch(fetchRelatedBooks(book))
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) return undefined
+
+    const request = dispatch(fetchMyRequests(user.id))
     return () => request.abort()
-  }, [dispatch, book])
+  }, [dispatch, isAuthenticated, user?.id])
 
   const handleBorrow = async () => {
+    if (!book?.available || hasActiveRequestForBook) return
     try {
       await dispatch(createRequest({ book, user })).unwrap()
       notify("Borrow request submitted.")
@@ -132,15 +156,17 @@ const BookDetails = () => {
                   variant="contained"
                   size="large"
                   startIcon={<MenuBook />}
-                  disabled={!book.available || creatingRequest}
+                  disabled={!book.available || creatingRequest || hasActiveRequestForBook}
                   onClick={handleBorrow}
                   color={book.available ? "primary" : "inherit"}
                 >
                   {!book.available
                     ? t("Currently unavailable")
-                    : creatingRequest
-                      ? t("Submitting...")
-                      : t("Request to borrow")}
+                    : hasActiveRequestForBook
+                      ? t("Already requested")
+                      : creatingRequest
+                        ? t("Submitting...")
+                        : t("Request to borrow")}
                 </Button>
               )
             ) : (
@@ -153,13 +179,13 @@ const BookDetails = () => {
         </Stack>
       </Paper>
 
-      {related.items.length > 0 && (
+      {related.length > 0 && (
         <Box sx={{ mt: 5 }}>
           <Divider sx={{ mb: 3 }} />
           <Typography variant="h6" fontWeight={600} mb={2}>
             {t("Related books")}
           </Typography>
-          <BookGrid books={related.items} />
+          <BookGrid books={related} />
         </Box>
       )}
     </Box>

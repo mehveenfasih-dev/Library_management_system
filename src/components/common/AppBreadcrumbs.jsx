@@ -1,17 +1,19 @@
 import { Breadcrumbs, Link, Typography } from "@mui/material"
-import { Link as RouterLink, matchPath, useLocation } from "react-router-dom"
+import { Link as RouterLink, matchPath, useLocation, useParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 
 import { routeConfig } from "../../app/routeConfig"
 import { ROUTES } from "../../routes/routeConstants"
-import { selectBookDetail } from "../../store/slices/bookSlice"
+import { selectCatalog } from "../../store/slices/bookSlice"
 import { useLocale } from "../../providers/LocaleProvider"
 import { useAuth } from "../../providers/AuthProvider"
 
 const useCrumbs = () => {
   const { pathname } = useLocation()
+  const { id } = useParams()
   const { isAdmin } = useAuth()
-  const { book } = useSelector(selectBookDetail)
+  const { books: catalogBooks } = useSelector(selectCatalog)
+  const book = catalogBooks.find((item) => item.id === id)
 
   const route = routeConfig.find((item) => matchPath(item.path, pathname))
   const isBookDetails = Boolean(matchPath(ROUTES.BOOK_DETAILS, pathname))

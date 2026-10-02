@@ -26,13 +26,13 @@ export const toggleUserStatus = createAsyncThunk(
 )
 
 const setActive = (state, id, active) => {
-  const user = state.items.find((item) => item.id === id)
+  const user = state.users.find((item) => item.id === id)
   if (user) user.active = active
 }
 
 const userSlice = createSlice({
   name: "users",
-  initialState: { items: [], total: 0, status: "idle", error: null },
+  initialState: { users: [], total: 0, status: "idle", error: null },
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -41,7 +41,7 @@ const userSlice = createSlice({
         state.error = null
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.items = action.payload.items
+        state.users = action.payload.items
         state.total = action.payload.total
         state.status = "succeeded"
       })
